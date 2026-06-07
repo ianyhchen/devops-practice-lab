@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: devops-practice-api
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: devops-practice-api
+
+  template:
+    metadata:
+      labels:
+        app: devops-practice-api
+
+    spec:
+      containers:
+        - name: api
+          image: devops-practice-api:local
+          imagePullPolicy: Never
+          
+          ports:
+            - containerPort: 8080
+          
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: api-config
+                  key: PORT
+
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8080
+
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
